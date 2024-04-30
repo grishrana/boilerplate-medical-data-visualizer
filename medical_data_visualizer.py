@@ -22,7 +22,7 @@ df['cholesterol']=df['cholesterol'].apply(lambda x: 1 if x>1 else 0)
 # 4
 def draw_cat_plot():
     # 5
-    df_cat = df.melt(id_vars='cardio',value_vars=['cholesterol','gluc','smoke','alco','active','overweight'])
+    df_cat = df.melt(id_vars='cardio',value_vars=['active','alco','cholesterol','gluc','overweight','smoke'])
     df_cat['total']=0
     variable_list=['cholesterol','gluc','smoke','alco','active','overweight']
     for variables in variable_list:
@@ -41,7 +41,7 @@ def draw_cat_plot():
 
     # 8
     fig = sns.catplot(data=df_cat,x='variable',y='total',col='cardio',hue='value',kind='bar')
-
+    fig=fig.figure
 
     # 9
     fig.savefig('catplot.png')
@@ -51,20 +51,27 @@ def draw_cat_plot():
 # 10
 def draw_heat_map():
     # 11
-    df_heat = None
-
+    df_heat = df[
+        (df['ap_lo']<=df['ap_hi'])&
+        (df['height']>=df['height'].quantile(0.025))&
+        (df['height']<=df['height'].quantile(0.975))&
+        (df['weight']>=df['weight'].quantile(0.025))&
+        (df['weight']<=df['weight'].quantile(0.975))
+    ]
+    df_heat.reset_index(inplace=True)
     # 12
-    corr = None
+    corr = df_heat.corr()
 
     # 13
-    mask = None
+    mask = corr.where(~(np.triu(np.ones(corr.shape)).astype(bool)))
 
 
 
     # 14
-    fig, ax = None
+    fig, ax = plt.subplots(figsize=(12,6))
 
     # 15
+    sns.heatmap(data=mask,annot=True,fmt=".1f",center=0,vmax=0.3,linewidths=0.5,square=True,ax=ax,cbar_kws={'shrink':0.5})
 
 
 
